@@ -1,5 +1,7 @@
 # 3. Категории
 
+[![Build core categories](https://github.com/rmuhamedgaliev/treasurer/actions/workflows/3_core_categories_build.yml/badge.svg)](https://github.com/rmuhamedgaliev/treasurer/actions/workflows/3_core_categories_build.yml)
+
 Для работы нашего приложения нам необходимо как-то категоризировать денежные транзакции. Для этого давайте в ядре проекта сделаем работу с категориями. Это задание не будет содержать подробных гайдов, а будет содержать задания. Которые необходимо реализовать. 
 
 В первую очередь давайте для тестирования нашего проекта будем использовать [Junit 5](https://junit.org/junit5/). Для этого в файле [pom.xml](./treasurer/core/pom.xml) замените зависимость проекта на 
