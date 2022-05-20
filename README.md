@@ -9,3 +9,4 @@ __DISCLAMER__ Этот проект находится в разработке
 
 - [1. Интро](./1_Intro/README.md)
 - [2. Настройка проекта](./2_project_setup/README.md)
+- [3. Категории](./3_core_categories/README.md)
