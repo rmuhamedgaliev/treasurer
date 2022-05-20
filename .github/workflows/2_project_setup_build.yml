@@ -1,0 +1,24 @@
+name: Build project setup
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+defaults:
+ run:
+  working-directory: ./2_project_setup/treasurer
+jobs:
+  Chek-PR:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 18
+        uses: actions/setup-java@v3
+        with:
+          java-version: '18'
+          distribution: 'zulu'
+      - name: Run maven tests
+        run: mvn test
+      
+      
