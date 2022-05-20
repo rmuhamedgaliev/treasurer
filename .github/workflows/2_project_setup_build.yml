@@ -13,7 +13,7 @@ defaults:
  run:
   working-directory: ./2_project_setup/treasurer
 jobs:
-  Chek-PR:
+  Run_tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
