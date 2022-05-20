@@ -1,4 +1,4 @@
-# Настройка проекта
+# 2. Настройка проекта
 
 [![Build project setup](https://github.com/rmuhamedgaliev/treasurer/actions/workflows/2_project_setup_build.yml/badge.svg?branch=master)](https://github.com/rmuhamedgaliev/treasurer/actions/workflows/2_project_setup_build.yml)
 
