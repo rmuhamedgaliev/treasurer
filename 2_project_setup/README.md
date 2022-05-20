@@ -1,5 +1,7 @@
 # Настройка проекта
 
+[![Build project setup](https://github.com/rmuhamedgaliev/treasurer/actions/workflows/2_project_setup_build.yml/badge.svg?branch=master)](https://github.com/rmuhamedgaliev/treasurer/actions/workflows/2_project_setup_build.yml)
+
 Разрабатывать проект мы будем при помощи [мульти-модульной структуре](https://www.baeldung.com/maven-multi-module). [Maven поддерживает создание проекта с разными модулями](https://www.baeldung.com/maven-multi-module). Для создания проекта необходимо проделать следующие шаги:
 
 Везде где вы видите `dev.rmuhamedgaliev`, заменяйте на свой пакет. Правила именования доступны по [ссылке.](https://docs.oracle.com/javase/tutorial/java/package/namingpkgs.html)
