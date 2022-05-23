@@ -31,7 +31,6 @@ public class AppTest
      * Rigourous Test :-)
      */
     public void testApp() {
-        Category category = new Category("1");
-        Assert.assertNotNull(category);
+
     }
 }
