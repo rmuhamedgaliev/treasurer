@@ -2,7 +2,7 @@ package dev.rmuhamedgaliev.domain.category;
 
 import dev.rmuhamedgaliev.core.domain.category.Category;
 import dev.rmuhamedgaliev.core.domain.category.CategoryRepository;
-import dev.rmuhamedgaliev.core.domain.category.InMemoryCategory;
+import dev.rmuhamedgaliev.core.domain.category.InMemoryCategoryRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +14,7 @@ import java.util.Map;
 class CategoryRepositoryTest {
     private Map<String, Category> categories = new HashMap<>();
 
-    private final CategoryRepository categoryRepository = new InMemoryCategory(categories);
+    private final CategoryRepository categoryRepository = new InMemoryCategoryRepository(categories);
 
     @BeforeEach
     public void prepareTest() {

@@ -183,5 +183,246 @@ public class HelloController {
     - [@PutMapping](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/bind/annotation/PutMapping.html)
 - [@RequestParam](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/bind/annotation/RequestParam.html) - позволяет нам обрабатывать параметр в URL которые стоят за вопросительным знаком **?name=Name** или если параметр не первый то после знака амперсанд **&name=Name**
 
-Теперь давайте попробуем добавить наши категории в SpringBoot приложение.
+Теперь давайте попробуем добавить наши категории в SpringBoot приложение. В модуле **api** создаем пакет **category**.
 
+Создаем файл [CategoryContextConfiguration](./treasurer/api/src/main/java/dev/rmuhamedgaliev/api/category/CategoryContextConfiguration.java)
+
+```java
+package dev.rmuhamedgaliev.api.category;
+
+import dev.rmuhamedgaliev.core.domain.category.CategoryRepository;
+import dev.rmuhamedgaliev.core.domain.category.InMemoryCategory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class CategoryContextConfiguration {
+
+    @Bean
+    public CategoryRepository categoryRepository() {
+        return new InMemoryCategoryRepository();
+    }
+
+    @Bean
+    public CategoryManager categoryManager(CategoryRepository categoryRepository) {
+        return new CategoryManager(categoryRepository);
+    }
+}
+```
+
+Тут мы указываем Spring, что в качестве репозитория мы будем использовать [InMemoryCategoryRepository](./treasurer/core/src/main/java/dev/rmuhamedgaliev/core/domain/category/InMemoryCategoryRepository.java). Таким образом мы получаем возможность использовать DI контейнер для своих целей. Так же мы объявляем менеджер для бизнес логики [CategoryManager](./treasurer/api/src/main/java/dev/rmuhamedgaliev/api/category/CategoryManager.java).
+
+```java
+package dev.rmuhamedgaliev.api.category;
+
+import dev.rmuhamedgaliev.core.domain.category.Category;
+import dev.rmuhamedgaliev.core.domain.category.CategoryRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
+
+public class CategoryManager {
+
+    private final CategoryRepository categoryRepository;
+
+    @Autowired
+    public CategoryManager(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
+
+    public Collection<Category> findAll() {
+        return categoryRepository.findAll();
+    }
+
+    public Optional<Category> create(String name, Optional<String> description) {
+        return Optional.ofNullable(
+                categoryRepository.save(
+                        new Category(
+                                UUID.randomUUID().toString(),
+                                name,
+                                description
+                        )
+                )
+        );
+    }
+
+    public Optional<Category> findById(String categoryId) {
+        return categoryRepository.findCategoryById(categoryId);
+    }
+
+    public Optional<Category> update(String categoryId, String name, Optional<String> description) {
+        return categoryRepository
+                .findCategoryById(categoryId)
+                .map(c -> {
+                    c.setName(name);
+                    description.ifPresent(c::setDescription);
+                    return c;
+                });
+    }
+}
+```
+
+Для исключительных ситуации мы можем создать свое исключение и при его пробросе наш сервер будет отвечать кодом **500** [CategoryException](./treasurer/api/src/main/java/dev/rmuhamedgaliev/api/category/exception/CategoryException.java).
+
+```java
+package dev.rmuhamedgaliev.api.category.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+public class CategoryException extends RuntimeException {
+
+    public CategoryException(String message) {
+        super(message);
+    }
+
+    public CategoryException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+```
+
+Теперь давайте создадим контроллер для обработки запросов, в пакете [web](./treasurer/api/src/main/java/dev/rmuhamedgaliev/api/web/) создаем файл [CategoryController](./treasurer/api/src/main/java/dev/rmuhamedgaliev/api/web/CategoryController.java).
+
+```java
+package dev.rmuhamedgaliev.api.web;
+
+import dev.rmuhamedgaliev.api.category.CategoryManager;
+import dev.rmuhamedgaliev.api.category.exception.CategoryException;
+import dev.rmuhamedgaliev.api.web.dto.CategoryDto;
+import dev.rmuhamedgaliev.api.web.dto.CreateCategoryDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping(path = "/category")
+public class CategoryController {
+
+    private final CategoryManager manager;
+
+    @Autowired
+    public CategoryController(CategoryManager categoryManager) {
+        this.manager = categoryManager;
+    }
+
+    @GetMapping
+    public List<CategoryDto> findAll() {
+        return manager.findAll().stream().map(CategoryDto::new).collect(Collectors.toList());
+    }
+
+    @PostMapping
+    public CategoryDto create(@RequestBody CreateCategoryDTO dto) {
+        return manager.create(dto.name(), dto.description())
+                      .map(CategoryDto::new)
+                      .orElseThrow(() -> new CategoryException("Error on create category"));
+    }
+
+    @GetMapping(path = "/{categoryId}")
+    public CategoryDto findBydId(@PathVariable("categoryId") String categoryId) {
+        return manager.findById(categoryId)
+                      .map(CategoryDto::new)
+                      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+    }
+
+    @PutMapping(path = "/{categoryId}")
+    public CategoryDto updateCategory(@PathVariable("categoryId") String categoryId, @RequestBody CreateCategoryDTO dto) {
+        return manager.update(categoryId, dto.name(), dto.description())
+                      .map(CategoryDto::new)
+                      .orElseThrow(() -> new CategoryException("Error on update category"));
+    }
+}
+```
+
+Важно обратить внимание на следующие моменты:
+
+- `@RequestBody CreateCategoryDTO dto` - [@RequestBody](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/bind/annotation/RequestBody.html) говорит Spring о том, в какой объект будет преобразован JSON из запроса
+- `@PathVariable("categoryId") String categoryId` - [@PathVariable](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/bind/annotation/PathVariable.html) конфигурирует параметр который Spring возьмет из URL как идентификатор категории.
+
+И для того что бы не передавать объекты из ядра приложения и иметь возможность трансформировать ответ в необходимый формат, рекомендуется использовать паттерн [DTO](https://www.baeldung.com/java-dto-pattern). Давайте создадим [CategoryDto](./treasurer/api/src/main/java/dev/rmuhamedgaliev/api/web/dto/CategoryDto.java)
+
+```java
+package dev.rmuhamedgaliev.api.web.dto;
+
+import dev.rmuhamedgaliev.core.domain.category.Category;
+
+import java.util.Collection;
+import java.util.Optional;
+
+public record CategoryDto(String id, String name, Collection<Category> subcategories, Optional<String> description) {
+
+    public CategoryDto(Category category) {
+        this(category.getId(), category.getName(), category.getSubcategories(), category.getDescription());
+    }
+}
+```
+
+А для создания новой категории нам необходимо создать другой [CreateCategoryDTO](./treasurer/api/src/main/java/dev/rmuhamedgaliev/api/web/dto/CreateCategoryDTO.java)
+
+```java
+package dev.rmuhamedgaliev.api.web.dto;
+
+import org.springframework.lang.NonNull;
+
+import java.util.Optional;
+
+public record CreateCategoryDTO(
+        @NonNull String name,
+        Optional<String> description
+) {
+}
+```
+
+Для тестирования вы можете воспользоваться любым HTTP клиентом из семейства Postman или можно работать с [HTTP клиентом из IDEA](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html#creating-http-request-files).
+
+Пример может быть таким:
+
+```http
+GET http://localhost:8080/?name=Rinat
+
+###
+
+POST http://localhost:8080/category
+Content-Type: application/json
+
+{
+  "name": "test category1"
+}
+
+###
+
+GET http://localhost:8080/category
+
+<> 2022-05-25T004502.200.json
+<> 2022-05-24T234743.200.json
+
+###
+
+GET http://localhost:8080/category/67b2b183-30d5-4298-a7db-1a1665019c07
+
+###
+PUT http://localhost:8080/category/67b2b183-30d5-4298-a7db-1a1665019c07
+Content-Type: application/json
+
+{
+  "name": "test update",
+  "description": "Update description"
+}
+
+```
+
+Таким образом мы получили самый простой CRUD для категорий.
+
+## Задание
+
+- Разберитесь с именованием REST ресурсов и как обычно строятся эндпоинты для запросов
+- Реализуйте базовый CRUD для категорий как в примере
+- Реализуйте недостающие методы для CRUD
+- Доделайте CRUD, что бы там была работа с подкатегориями. (Можете создать новый контроллер).

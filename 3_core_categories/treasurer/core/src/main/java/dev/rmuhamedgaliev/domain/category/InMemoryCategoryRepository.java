@@ -1,4 +1,4 @@
-package dev.rmuhamedgaliev.core.domain.category;
+package dev.rmuhamedgaliev.domain.category;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,15 +7,15 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class InMemoryCategory implements CategoryRepository {
+public class InMemoryCategoryRepository implements CategoryRepository {
 
     private final Map<String, Category> categories;
 
-    public InMemoryCategory(Map<String, Category> categories) {
+    public InMemoryCategoryRepository(Map<String, Category> categories) {
         this.categories = categories;
     }
 
-    public InMemoryCategory() {
+    public InMemoryCategoryRepository() {
         this.categories = new HashMap<>();
     }
 

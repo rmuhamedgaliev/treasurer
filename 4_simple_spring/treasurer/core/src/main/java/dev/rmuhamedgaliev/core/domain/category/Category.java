@@ -7,7 +7,7 @@ import java.util.Optional;
 public class Category {
     private final String id;
 
-    private final String name;
+    private String name;
 
     private final Collection<Category> subcategories;
 
@@ -51,6 +51,10 @@ public class Category {
 
     public void setParent(Category parent) {
         this.parent = Optional.of(parent);
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setDescription(String description) {

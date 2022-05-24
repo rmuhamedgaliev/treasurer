@@ -11,7 +11,7 @@ import java.util.Map;
 class CategoryRepositoryTest {
     private Map<String, Category> categories = new HashMap<>();
 
-    private final CategoryRepository categoryRepository = new InMemoryCategory(categories);
+    private final CategoryRepository categoryRepository = new InMemoryCategoryRepository(categories);
 
     @BeforeEach
     public void prepareTest() {
