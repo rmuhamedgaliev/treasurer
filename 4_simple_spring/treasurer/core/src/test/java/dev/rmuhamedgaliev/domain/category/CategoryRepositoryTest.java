@@ -1,5 +1,8 @@
 package dev.rmuhamedgaliev.domain.category;
 
+import dev.rmuhamedgaliev.core.domain.category.Category;
+import dev.rmuhamedgaliev.core.domain.category.CategoryRepository;
+import dev.rmuhamedgaliev.core.domain.category.InMemoryCategoryRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
